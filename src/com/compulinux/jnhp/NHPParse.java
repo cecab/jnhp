@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 
 public class NHPParse {
 	String rhtml ;
-	Vector splits ;
+	Vector<NHPNode> splits ;
 	Document document ; 
 	
 	final String VARNODE_TYPE="var";
@@ -38,7 +38,7 @@ public class NHPParse {
 	
 	
 	public NHPParse(String sw) {
-		splits = new Vector();
+		splits = new Vector<NHPNode>();
 		// add content of strings as a TEXTNODE_TYPE 
 		NHPNode ct  = new NHPNode(TEXTNODE_TYPE);
 		ct.setContent(sw);
@@ -49,7 +49,7 @@ public class NHPParse {
 	}
 	
 	public NHPParse(InputStream is) {
-		splits = new Vector();
+		splits = new Vector<NHPNode>();
 		try {
 		StringWriter sw  = new StringWriter(0);
 		int c ; 
@@ -72,7 +72,7 @@ public class NHPParse {
 	}
 	
 	public NHPParse(File fis) {
-		splits = new Vector();
+		splits = new Vector<NHPNode>();
 		try {
 			StringWriter sw = new StringWriter(0);
 			// String c ;
@@ -82,6 +82,7 @@ public class NHPParse {
 			while ((c = fr.read()) != -1) {
 				sw.write(c);
 			}
+			fr.close();
 			// add content of file as a TEXTNODE_TYPE
 			NHPNode ct = new NHPNode(TEXTNODE_TYPE);
 			ct.setContent(sw.toString());
@@ -101,8 +102,7 @@ public class NHPParse {
 		int isize = splits.size();
 		String rhtml =  ((NHPNode) splits.get(isize -1 )).getContent();
 		if ( (  i =rhtml.indexOf("{{")) != -1  ) {
-			String tagcontent =""; 
-			String tagleft="" ; 
+			String tagcontent =""; 			
 			String tagright=""; 
 			String tagpre  = rhtml.substring(0,i);
 			String posttag = rhtml.substring(i+2, rhtml.length());
@@ -178,8 +178,7 @@ public class NHPParse {
 		    Element  padre = root ; 
 		    for ( int j = 0 ; j < splits.size() ; j++ ) {
 		    	NHPNode n = (NHPNode)splits.get(j); 
-		    	String tipo = n.getTipo();
-		    	Element ch1 ; 
+		    	String tipo = n.getTipo();		    	
 		    	if ( tipo.compareTo("TEXT") == 0 ) {
 		    		Node chtext = document.createTextNode(n.getContent());
 		    		padre.appendChild(chtext);
