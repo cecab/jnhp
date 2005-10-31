@@ -257,7 +257,9 @@ public class Jnhp {
 		}
 
 	}
-
+	public void setVar(String id, Object val) throws Exception {
+		this.setVar(id, val.toString());	
+	}
 	public Element findVarInClonedTree(String id) {
 		NodeList list_c = doc2.getElementsByTagName("var");
 		String myRepeat ; 
