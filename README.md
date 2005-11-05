@@ -6,12 +6,12 @@ The purpose of this blog is explains the organization of the logic and design th
 ## A Brief Idea of our API
 Our goal is being able of generate content using a template, the API and, of course, the data that fills the template. The following code listing shows the content that is intended to be generated:  a combo-list (select) in HTML:
 
->"<select>
+```<select>
   <option value="volvo">Volvo</option>
   <option value="saab">Saab</option>
   <option value="mercedes">Mercedes</option>
   <option value="audi">Audi</option>
-</select>"
+  </select> ```
 
 The template only needs the structure and the tags that will be used from the Java API, the templating process will depend on the dynamic parts, for our example is the **OPTION** tag, every HTML option tag will be iterated over a list of values, for this we can use a block **REPEAT** to delimit the portion of the template that will change in each iteration. The following listing represents the template for our example:
 
