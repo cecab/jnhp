@@ -1,4 +1,5 @@
 package jnhp.testing;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,22 @@ public class TestParseFromString {
 				jr.doRepeat("more_colors");				
 			}
 			System.out.println("Resolved string  with Repeat is:" + jr.toString());
+			// A template taken from a file.
+			Jnhp jf = new Jnhp(new File("resources/select.html"));
+			List<String> the_cars = new ArrayList<String> ();
+			the_cars.add("volvo");
+			the_cars.add("saab");
+			the_cars.add("mercedes");
+			the_cars.add("audi");
+			for (String one_car : the_cars) {
+				jf.setVar("value_code", one_car);
+				jf.setVar("value_text", one_car.toUpperCase());
+				jf.doRepeat("more_vals");
+			}
+			System.out.println("The cars:\n" + jf.toString());
+			// Composition of 'applications'.
+			
+			
 		}
 		catch ( Exception ex) {
 			System.err.println(ex.getMessage());
