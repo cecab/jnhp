@@ -61,5 +61,88 @@ The parsing consists of take a string, detect the tags (vars, repeats, and appli
 
 
 The parsing consists of take a string, detect the tags (vars, repeats, and application) and build a Tree similar to the figure.
+<img height="300px" align="center" src="resources/figure-1.png?raw=true">
+
+The tree corresponds to the string **_“A dynamic value is {{value}}”**_.  The text is used to create nodes holding the same position inside the tree as from the original string, the last right node of type TEXT is used only as an “end of child” mark for the parent node (jnhp in the figure). 
+
+# API Implementation
+## setVar method 
+
+The parser for the string  _"A dynamic value is {{value}}"_  builds a Tree similar to the figure:
+
+<img height="300px" align="center" src="resources/figure-2.png?raw=true">
+
+What we need is that after calling the method **setVar(“value”,100)** the value received in the call should be saved in a way that will generate the final result: **_“A dynamic value is 100”**_. The next figure shows the Tree modified after calling the method setVar(...):
+
+
+<img height="300px" align="center" src="resources/figure-3.png?raw=true">
+
+Using this change, we can create the resulting string with a Depth First Search strategy. Note the use of a new attribute “assigned” that will help to optimize the string generation and only descent into VAR nodes that have been assigned (value of attribute assigned equals to 1 ) . 
+
+## Repeat Method
+The REPEAT tag resolve a block (delimited with the tag {{repeat..}} in the template) and use all the previous calls to setVar(...) to generate a text, additionally it can support more calls and generate more text appended to the previous calls. The next figure how to Java calls are related with the final result.
+
+<img height="300px" align="center" src="resources/figure-4.png?raw=true">
+
+So, contrary to VAR nodes, REPEAT nodes are responsible for generating text but preserve the original structure so more doRepeat(..) call are possible. The next figure shows how we can implement this in the Tree data structure:
+
+
+<img height="300px" align="center" src="resources/figure-5.png?raw=true">
+
+The REPEAT blocks just act as the parent nodes of all the other tags found from the original String. After calling setVar(....) with the value “Red” in  the java code, the Tree is modified as shown in the following figure:
+
+
+<img height="300px" align="center" src="resources/figure-6.png?raw=true">
+
+The value “Red” is saved in the Tree as a child node of type Text below the VAR node with the id=”a_color”, additionally note the VAR node is changed so the attribute “assigned” has the value of 1. When a REPEAT block needs to generate the resolved text from its descendants, it will use the assigned attribute for VAR nodes such that for those that do not have the value assigned, an empty string will be generate to represent the value of the node. 
+
+This behaviour can be show after the first call to doRepeat(“more_colors”), which modifies the Tree as shown:
+
+
+<img height="300px" align="center" src="resources/figure-7.png?raw=true">
+
+The region highlighted with red dot lines is the resulting string created from the REPEAT descendants, which by the way, can not been modified after the first doRepeat call. Successive calls to doRepeat(..) will continue create more text node in a similar way, in other words, repeat blocks are resolved as text and located in the left from the original position of the REPEAT tag.
+
+## doApplication Method
+
+Until now, our solution can manage only a single template, even that we can put nested repeat TAGs, this will not scale to manage multiples blocks in different files and reuse the content. For solving this issue, we implement the  doApplication method, which works closely to the “application” TAG, the figure show a template with three application tags to compose a page from different parts. 
+
+
+<img height="250px" align="center" src="resources/figure-8.png?raw=true">
+
+
+The parsed Tree is shown in the following figure:
+
+
+<img height="300px" align="center" src="resources/figure-9.png?raw=true">
+
+The implementacion consists in resolve the node and replace it by the result. This means that we can only run an application once, because its execution will modify the original structure, note this in contrast to REPEAT tags. 
+
+
+<img height="300px" align="center" src="resources/figure-10.png?raw=true">
+
+Also in the **line 160**, the main task  of this method is done by **runNodeApplication(..)** method. In the next figure we can see the implementation 
+
+<img height="300px" align="center" src="resources/figure-11.png?raw=true">
+
+In lines from ** 202 to 205 ** the template is initialized from a file that is searched using global (static) value that the programmer should modify as he/she needs. In lines from 215 to 222 we try to locate the class and instantiate a new object, if that succeed, then the method runApp is called given that all java classes implements the runApplication interface, which guarantees  the existence of that method. 
+
+The next listing shows the class jnhp.testing.header:
+
+<img height="300px" align="center" src="resources/figure-12.png?raw=true">
+
+This means that when the template needs to be resolved, this class will run the method runApp, note that the unique argument for the method is the Jnhp object that represent the template, in this way a call to setVar() as showed in the previous figure will generate the next content:
+
+<img height="200px" align="center" src="resources/figure-13.png?raw=true">
+
+If the method can not find a Java class with the name deduced from the ID of the tag application, it simply ignore the invocation of runApp and resolve the template, this is the case for “body” template:
+
+
+<img align="center" src="resources/figure-14.png?raw=true">
+
+Which have no a class implemented, the result during the expansion will delete the “temp” tag as shown  before.
+
+With our three TAGs (var, repeat, application)  we can combine dynamic values, multiples files and java classes to create a complete hierarchy for web sites. See on “JPage sevlet” the details about the integration of Jnhp in servlets invironments and the solutions for issues like security, session and widgets. 
+
 
 
